@@ -27,6 +27,10 @@ To be able to display any duplicate ships currently stored in the system
 To be able to calculate and display the fastest ship
 To be able to view ships currently stored in the system
 
+### Usage:
+- To compile do `javac *.java`
+- To run do `java ShipManager`
+
 
 
 
