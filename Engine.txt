@@ -1,0 +1,144 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 29/04/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Handles anything related with Engine details for a ship including
+*           validating exclusive fields
+******************************************************************************/
+
+CLASS: Engine
+
+	PRIVATE CLASS CONSTANTS: BATTERY := "BATTERY"
+							 DIESEL := "DIESEL"
+							 BIO := "BIO"
+
+	CLASS FIELDS: fuel (String)
+				  cylinders (Integer)
+
+	CONSTRUCTORS:    
+	Default:
+		IMPORT: none
+		EXPORT: address of new Engine object
+		ASSERTION: 
+		ALGORITHM:  cylinders := 15
+					fuel := BIO
+
+	Alternate:
+		IMPORT: fuel (String), cylinders (Integer)
+		EXPORT: address of new Engine object
+		ASSERTION: Creates the object if the imports are valid and FAILS otherwise
+		ALGORITHM:         
+				IF (validateCylinders <- inCylinders == false) THEN
+					FAIL <- "Invalid Cylinders amount"
+				END IF
+
+				IF (inFuel == Null OR validateFuel <- inFuel == FALSE) THEN
+
+					FAIL <- "Invalid Maximum Depth")
+				END IF
+
+
+			cylinders := inCylinders
+			fuel := inFuel (toUpperCase)
+
+	Copy:
+		IMPORT: inEngine (Engine)
+		EXPORT: address of new Engine object
+		ASSERTION: Creates an object with an identical object state as the import.
+		ALGORITHM:  cylinders := inEngine.getCylinders <- none
+					fuel := inEngine.getFuel <- none
+
+
+	SUBMODULE: clone
+	IMPORT: none
+	EXPORT: Engine
+	ASSERTION: construct a new Engine object which is a copy of this object
+	ALGORITHM:
+		CONSTRUCT Engine using this
+	END SUBMODULE
+
+
+	ACCESSORS:    
+	SUBMODULE: getFuel
+	IMPORT: none
+	EXPORT: fuel
+	END SUBMDOULE
+
+	SUBMODULE: getCylinders
+	IMPORT: none
+	EXPORT: cylinders
+	END SUBMODULE
+
+	SUBMODULE: toString
+	IMPORT: none
+	EXPORT: str
+	ASSERTION:
+	ALGORITHM: 
+		str = "Cylinders: " + cylinders + " Fuel Type: " + fuel
+	END SUBMODULE
+
+	SUBMODULE: toFileString
+	IMPORT: none
+	EXPORT: return str
+	ASSERTION:
+	ALGORITHM: 
+		str = cylinders + "," + fuel
+	END SUBMODULE
+
+
+	MUTATORS:
+	SUBMODULE: setFuel
+	IMPORT: inFuel (String)
+	EXPORT: none
+	ASSERTION: sets the fuel if valid and it fails otherwise
+	ALGORITHM: 
+		IF (validateFuel <- inFuel) THEN
+			fuel := inFuel
+	   ELSE
+		   FAIL <- "Invalid Fuel Type"
+	   END IF
+	END SUBMODULE
+
+	SUBMODULE: setCylinders
+	IMPORT: inCylinders (Integer)
+	EXPORT: none
+	ASSERTION: sets the cylinders if valid and it fails otherwise
+	ALGORITHM: 
+		IF (validateCylinders <- inCylinders) THEN
+			cylinders := inCylinders
+	   ELSE
+		   FAIL <- "Invalid Cylinders Amount"
+	   END IF
+	END SUBMODULE
+
+	SUBMODULE: equals
+	IMPORT: inObj (Engine)
+	EXPORT: isEqual (boolean)
+	ASSERTION: If all class fields are equal between engines, they are interchangeable
+	ALGORITHM: 
+		isEqual := false
+		IF (inObj IS A Engine) THEN
+			inEngine:= (Convert to Engine)inObj
+			isEqual := (fuel EQUALS inEngine.getFuel <- none) AND (cylinders EQUALS inEngine.getCylinders <- none)
+		ENDIF
+	END SUBMODULE
+
+
+	VALIDATION SUBMODULES:
+	SUBMODULE: validateFuel
+	IMPORT: inFuel (String)
+	EXPORT: valid (boolean)
+	ASSERTION: Fuel type must be either BATTERY,DIESEL or BIO
+	ALGORITHM: 
+		valid := (inFuel EQUALS BATTERY) OR (inFuel EQUALS DIESEL) OR (inFuel EQUALS BIO)
+	END SUBMODULE
+
+	SUBMODULE: validateCylinders
+		IMPORT: inCylinders (integer)
+		EXPORT: valid (boolean)
+		ASSERTION: Ammount of cylinders must be between 2 and 20 (inclusive)
+		ALGORITHM: 
+			valid := ((inCylinders >= 2) AND (inCylinders <= 20))
+	END SUBMODULE
+	
+END CLASS

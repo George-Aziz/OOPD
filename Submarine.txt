@@ -1,0 +1,170 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 29/04/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Handles anything related with submarines ship type including
+*           validating exclusive fields and toString methods
+******************************************************************************/
+
+CLASS: Submarine
+
+	PRIVATE CLASS CONSTANTS: STEEL := "STEEL"
+							 ALLOY := "ALLOY"
+							 TITANIUM := "TITANIUM"
+
+	CLASS FIELDS: hull (String)
+				  maxDepth (real)
+
+
+	CONSTRUCTORS:    
+	Default:
+		IMPORT: none
+		EXPORT: address of new Submarine object
+		ASSERTION: 
+		ALGORITHM:  super default constructor
+					hull = STEEL
+					maxDepth = -399.25
+
+	Alternate:
+		IMPORT: inSerialNum (Real) , inComYear (Integer) , inHull (String) , inMaxDepth (Real), inEngine (Object)
+		EXPORT: address of new Submarine object
+		ASSERTION: Creates the object if the imports are valid and FAILS otherwise
+		ALGORITHM:  
+					super <- inSerialNum, inComYear, inEngine
+
+					IF inHull is null OR validateHull <- inHull is false THEN
+						FAIL <- "Invalid Hull Material"
+					END IF
+					IF validateMaxDepth <- inMaxDepth
+						FAIL <- "Invalid Maximum Depth"
+					END IF
+
+					hull := inHull
+					maxDepth := inMaxDepth
+
+	Copy:
+		IMPORT: inSubmarine (Submarine)
+		EXPORT: address of new Submarine object
+		ASSERTION: Creates an object with an identical object state as the import.
+		ALGORITHM:  super <- inSubmarine
+					hull := inSubmarine.getHull <- none
+					maxDepth := inSubmarine.getMaxDepth <- none
+
+
+	SUBMODULE: clone
+	IMPORT: none
+	EXPORT: Submarine (Submarine Object)
+	ASSERTION: construct a new Submarine object which is a copy of this object
+	ALGORITHM:
+		CONSTRUCT Submarine using this
+	END SUBMODULE
+
+
+	ACCESSORS:    
+	SUBMODULE: getHull
+	IMPORT: none
+	EXPORT: hull
+	END SUBMODULE
+
+	SUBMODULE: getMaxDepth
+	IMPORT: none
+	EXPORT: maxDepth
+	END SUBMODULE
+
+	SUBMODULE toString
+	IMPORT: none
+	EXPORT: str
+	ASSERTION:
+	ALGORITHM: 
+		str := "This is a submarine \n" + super.toString() + " Hull Material: " + hull + " Max Depth: " + maxDepth(Round to 2dp) + "\n"
+	END SUBMODULE	
+
+	SUBMODULE toFileString
+	IMPORT: none
+	EXPORT: str
+	ALGORITHM: 
+		shipType (Character) := 'S'
+		str := shipType + "," + super.getSerialNum <- none + "," + super.getComYear <- none + "," + super.getEngine < none.getCylinders <- none + "," + super.getEngine <- none.getFuel <- none + "," + hull + "," + maxDepth
+	END SUBMODULE
+
+	SUBMODULE toDistanceString
+	IMPORT: none
+	EXPORT: str
+	ALGORITHM: 
+		char shipType := 'S'
+		str := "The fastest ship is a " + shipType + " with serialNum: " + super.getSerialNum() + " that took "
+	END SUBMODULE
+
+
+
+	MUTATORS:
+	SUBMODULE: setHull
+	IMPORT: inHull (String)
+	EXPORT: none
+	ASSERTION: sets the hull if valid and it fails otherwise
+	ALGORITHM: 
+		IF (validateHull <- inHull) THEN
+			hull := inHull
+	   ELSE
+		   FAIL
+	   END IF
+	END SUBMODULE
+
+	SUBMODULE: setMaxDepth
+		IMPORT: inMaxDepth (real)
+		EXPORT: none
+		ASSERTION: sets the maxDepth if valid and it fails otherwise
+		ALGORITHM: 
+			IF (validateMaxDepth <- inMaxDepth) THEN
+				maxDepth := inMaxDepth
+		   ELSE
+			   FAIL
+		   END IF
+	END SUBMODULE 
+
+	SUBMODULE: equals
+	IMPORT: inObj (Submarine)
+	EXPORT: isEqual (boolean)
+	ASSERTION: If all class fields are equal between submarines, they are interchangeable
+	ALGORITHM: 
+		isEqual := FALSE
+		IF (inObj IS A Submarine) THEN
+			inSubmarine:= (Convert to Submarine)inObj
+			isEqual := (super EQUALS inSubmarine) AND (hull EQUALS inSubmarine.getHull <- none) AND (maxDepth EQUALS inSubmarine.getMaxDepth <- none)
+		ENDIF
+	END SUBMODULE
+
+	SUBMODULE: calcTravel
+	IMPORT: distance (integer)
+	EXPORT: travelTime (Real)
+	ASSERTION: Calculates travel time for submarine objects
+	ALGORITHM:
+		cylinders (Integer) := getEngine <- none.getCylinders <- none
+
+		travelTime (Real) := (distance / cylinders) * (1 / (10 + maxDepth * -1))
+	END SUBMODULE
+
+
+	VALIDATION SUBMODULES:
+	SUBMODULE: validateHull
+	IMPORT: inHull (integer)
+	EXPORT: valid (boolean)
+	ASSERTION: Hull must be either made out of TITANIUM, ALLOY or STEEL
+	ALGORITHM: 
+		valid := (inHull EQUALS STEEL) OR (inHull EQUALS ALLOY) OR (inHull EQUALS TITANIUM)
+	END SUBMODULE
+
+	SUBMODULE: validateMaxDepth
+	IMPORT: inMaxDepth (Real)
+	EXPORT: valid (boolean)
+	ASSERTION: Max Depth must be between -500.0 to 0.0 (inclusive)
+	ALGORITHM: 
+		valid := ((inMaxDepth >= -500.0) AND (inMaxDepth <= 0.0))
+	END SUBMODULE
+END CLASS
+
+
+
+
+
+

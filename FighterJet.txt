@@ -1,0 +1,150 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 29/04/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Handles anything related with Fighter Jets ship type including
+*           validating exclusive fields and toString methods
+******************************************************************************/
+
+CLASS: FighterJet
+
+	CLASS FIELDS: ordnanace (String)
+				  wingSpan (real)
+
+
+	CONSTRUCTORS:    
+	Default:
+		IMPORT: none
+		EXPORT: address of new FighterJet object
+		ASSERTION: 
+		ALGORITHM:  super default constructor
+					ordanace := "Guns"
+					wingSpan := 23.3
+
+	Alternate:
+		IMPORT: inSerialNum (String) , inComYear (Integer) , inEngine (Engine), inOrdanace (String) , inWingSpan (Real), inEngine (Object)
+		EXPORT: address of new FighterJet object
+		ASSERTION: Creates the object if the imports are valid and FAILS otherwise
+		ALGORITHM:  
+					super <- inSerialNum, inComYear, inEngine
+					IF inOrdnance is null THEN
+						FAIL <- "Invalid Ordnance"
+					END IF
+					IF validateWingSpan <- inWingSpan is false THEN
+						FAIL <- <- "Invalid Wing Span"
+					END IF
+					ordanace := inOrdanace
+					wingSpan := inWingSpan
+
+	Copy:
+		IMPORT: inFighterJet (FighterJet)
+		EXPORT: address of new FighterJet object
+		ASSERTION: Creates an object with an identical object state as the import.
+		ALGORITHM:  super <- inFighterJet
+					ordanace := inFighterJet.getHull <- none
+					wingSpan := inFighterJet.getMaxDepth <- none
+
+
+	SUBMODULE: clone
+	IMPORT: none
+	EXPORT: FighterJet (FighterJet Object)
+	ASSERTION: construct a new FighterJet object which is a copy of this object
+	ALGORITHM:
+		CONSTRUCT FighterJet using this
+
+	END SUBMODULE
+
+	ACCESSORS:    
+	SUBMODULE: getOrdanace
+	IMPORT: none
+	EXPORT: ordanace	
+	END SUBMODULE
+
+	SUBMODULE: getWingSpan
+	IMPORT: none
+	EXPORT: wingSpan
+	END SUBMODULE
+
+	SUBMODULE toString
+	IMPORT: none
+	EXPORT: str
+	ALGORITHM: 
+		str := "This is a Fighter Jet \n" + super.toString <- none + " Wing Span: " + wingSpan(Round to 2dp) + " Ordnance: " + ordnance + "\n"
+	END SUBMODULE
+
+	SUBMODULE toFileString
+	IMPORT: none
+	EXPORT: str
+	ALGORITHM: 
+		shipType (Character) := 'F'
+		str := shipType + "," + super.getSerialNum <- none + "," + super.getComYear <- none + "," + super.getEngine < none.getCylinders <- none + "," + super.getEngine <- none.getFuel <- none + "," + wingSpan + "," + ordnance
+	END SUBMODULE
+
+	SUBMODULE toDistanceString
+	IMPORT: none
+	EXPORT: str
+	ALGORITHM: 
+		String shipType := "fighter jet"
+		str := "The fastest ship is a " + shipType + " with serialNum: " + super.getSerialNum <- none + " that took "
+	END SUBMODULE
+
+
+	MUTATORS:
+	SUBMODULE: setOrdanace
+	IMPORT: inOrdanace (String)
+	EXPORT: none
+	ASSERTION: sets the ordanace if valid and it fails otherwise
+	ALGORITHM: 
+		IF (ordanace != null) THEN
+			ordanace := inOrdanace
+	   ELSE
+		   FAIL
+	   END IF
+	END SUBMODULE
+
+	SUBMODULE: setWingSpan
+	IMPORT: inWingSpan (real)
+	EXPORT: none
+	ASSERTION: sets the wingSpan if valid and it fails otherwise
+	ALGORITHM: 
+		IF (validateWingSpan <- inWingSpan) THEN
+			wingSpan := inWingSpan
+	   ELSE
+		   FAIL
+	   END IF
+	END SUBMODULE
+
+	SUBMODULE: equals
+	IMPORT: inObj (Object)
+	EXPORT: isEqual (boolean)
+	ASSERTION: If all class fields are equal between fighter jets, they are interchangeable
+	ALGORITHM: 
+		isEqual := FALSE
+		IF (inObj IS A FighterJet) THEN
+			inFighterJet:= (Convert to FighterJet)inObj
+			isEqual := (super EQUALS inSubmarine) AND (ordanace EQUALS inFighterJet.getOrdanace <- none) AND (wingSpan EQUALS inFighterJet.getWingSpan <- none)
+		ENDIF
+	END SUBMODULE
+
+
+	SUBMODULE: calcTravel
+	IMPORT: distance (integer)
+	EXPORT: travelTime (Real)
+	ASSERTION: Calculates travel time for Fighter Jet object 
+	ALGORITHM:
+		cylinders (Integer) = getEngine <- none .getCylinders <- none
+
+		travelTime (Real) = (distance / (wingSpan * cylinders * 150))
+	END SUBMODULE
+
+
+	VALIDATION SUBMODULE:
+	
+	SUBMODULE: validateWingSpan
+	IMPORT: inWingSpan (real)
+	EXPORT: valid (boolean)
+	ASSERTION: Wing Span length must be between 2.20 to 25.6 (inclusive)
+	ALGORITHM: 
+		valid := ((inWingSpan >= 2.20) AND (inWingSpan <= 25.6))
+	END SUBMODULE
+END CLASS

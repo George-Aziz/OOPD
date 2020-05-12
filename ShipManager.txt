@@ -1,0 +1,14 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 6/05/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Calls the UI which is basically the connection of all the class files
+******************************************************************************/
+
+CLASS: ShipManager
+
+	MAIN
+		CONSTRUCT uI USING default
+		uI.mainMenu <- none
+	END MAIN
+END CLASS

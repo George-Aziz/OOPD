@@ -1,0 +1,136 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 04/05/2019
+*  Date Modified: 26/05/2019
+*  Purpose: Managing the ship arrays, that is the contents of the arrays define the object state
+******************************************************************************/
+
+CLASS: ShipStorage
+
+	PRIVATE CLASS CONSTANTS: MAX (Integer) := 30
+							DUPEMAX (Integer) := 900
+
+	CLASS FIELDS: shipArray (Ship Object)
+				  shipCount (Integer)
+
+
+	CONSTRUCTORS:
+	Default:
+		CONSTRUCT shipArray USING default[MAX]
+		shipCount := 0
+
+
+	ACCESSORS:
+
+	SUBMODULE: getShipCount
+	IMPORT: none
+	EXPORT: shipCount (Integer)
+
+	SUBMODULE: getShipArray
+	IMPORT: none
+	EXPORT: shipArrayCopy (Object Array of Ship)
+	ALGORITHM:
+		shipArrayCopy(ARRAY OF Ship Objects) SIZE OF MAX
+
+		FOR copyIndex (Integer) := 0 TO  shipCount (Exclusive) INC BY 1
+
+			shipArrayCopy[copyIndex] := shipArray[copyIndex].clone <- none; 
+
+		END FOR
+	END SUBMODULE
+
+	SUBMODULE: equals
+	IMPORT: inObj (shipObj)
+	EXPORT: isEqual
+	ASSERTION: If all shipObj and elements of shipArray are equal, they are interchangeable
+	ALGORITHM: 
+		isEqual := FALSE
+		IF (inObj IS A Submarine) THEN
+			inShip (Ship) := (Convert to Ship)shipObj
+
+			FOR equalsIndex (Integer) := 0 TO shipCount (Exclusive) INC BY 1
+				IF shipObj EQUALS shipArray[equalsIndex] THEN
+					isEqual := TRUE
+				END IF
+			END FOR
+		ENDIF
+	END SUBMODULE
+
+
+	SUBMODULE: addShip
+	IMPORT: Ship shipObject (Object)
+	EXPORT: none
+	ASSERTION: if object is not null and shipCount is not 30 then add object to shipArray
+	ALGORITHM: 
+		IF ((shipObject != null) AND (shipCount < MAX)) THEN
+			shipArray[shipCount] := shipObject.clone <- none
+			shipCount INC BY 1
+		ELSE
+			message (String) = "The object is either null or there isn't any space"
+			UserInterface.showMessage <- message
+		END IF
+
+	END SUBMODULE
+
+
+	SUBMODULE: destinationCheck
+	IMPORT: distance (Integer)
+	EXPORT: fastestShip (String)
+	ASSERTION: To Find the fastest ship out of all ships stored in the system 
+	ALGORITHM: 
+		fastestShipVal (Real) := MAX Real Value
+		fastestShipIndex (Integer) := -1 
+
+
+		FOR shipIndex (Integer) := 0 TO shipCount (Exclusive) INC BY 1
+
+			IF fastestShipVal (Real) > shipArray[shipIndex].calcTravel <- distance THEN
+
+				fastestShipVal (Real) := shipArray[shipIndex].calcTravel <- distance (Round to 2dp)
+				fastestShipIndex (Integer) := shipIndex
+			END IF
+		END FOR	
+
+		fastestShip (String) = shipArray[fastestShipIndex].toDistanceString <- none + fastestShipVal + " hours to travel" + distance + " meters"
+	END SUBMODULE	
+
+
+	SUBMODULE: findDuplicates
+	IMPORT: none
+	EXPORT: dupeArray []
+	ASSERTION: To Find if there any ships that are duplicates in ship array
+	ALGORITHM:
+		dupeArray(ARRAY OF String) SIZE OF 900
+		dupeCount (Integer) = 0
+
+
+		FOR (shipIndexA (Integer) := 0 TO shipCount (Exclusive) INC BY 1) 
+
+			FOR (shipIndexB (Integer) := shipIndexA + 1 TO shipCount (Exclusive) INC BY 1 
+
+				IF shipArray[shipIndexA] EQUALS shipArray[shipIndexB] THEN
+
+					dupeArray[dupeCount] := shipArray[shipIndexA].toString <- none
+					dupeCount INC BY 1
+
+				END IF
+			END FOR
+		END FOR
+
+	END SUBMODULE
+
+
+	SUBMODULE: viewShips
+	IMPORT: none
+	EXPORT: viewShipArray (ARRAY OF String)
+	ASSERTION: view all the ships
+	ALGORITHM:
+		viewShipArray (ARRAY OF String) Size of MAX
+
+		FOR viewShipIndex (Integer) := 0 TO shipCount (Exclusive) INC BY 1 
+
+			viewShipArray[viewShipIndex] := shipArray[viewShipIndex].toString <- none;
+		END FOR
+
+	END SUBMODULE
+END CLASS

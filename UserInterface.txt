@@ -1,0 +1,367 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date Created: 04/05/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Handles all user input / output for this program
+******************************************************************************/
+
+CLASS: UserInterface
+
+	CLASS FIELDS: sStore (ShipStorage)
+				  fileMgr (FileManager)
+
+	CONSTRCUTORS:
+	DEFAULT:
+
+		CONSTRUCT sStore USING default
+		CONSTRUCT fileMgr USING default
+
+
+	SUBMODULE: mainMenu
+	IMPORT: none
+	EXPORT: none
+	ASSERTION: Main menu that's the first output the user sees and is able to go into other menus 
+	ALGORITHM:
+
+		option (Integer) := 0
+
+		DO
+		
+			OUTPUT "Welcome, please select one of the options listed below: \n"                                                    
+			OUTPUT "1: Load ships from file" 
+			OUTPUT "2: Add a submarine"
+			OUTPUT "3: Add a fighter jet                       
+			OUTPUT "4: Check which ship is the fastest"       
+			OUTPUT "5: Find Duplicates"                     
+			OUTPUT "6: View the ships"                     
+			OUTPUT "7: Save ships to file"
+			OUTPUT "8: Exit \n"		
+
+			option := inputInteger <- "Please input the number next to the option:","ERROR: That wasn't a choice. Please select one of the 8 options \n \n",1,8
+
+
+			CASE option
+
+				1:
+					addShipMenuCSV <- sStore, fileMgr
+
+				2:
+					addSubs <- sStore
+
+				3:
+					addJets <- sStore
+
+				4: 
+					IF (sStore.getShipCount <- none < 1) THEN
+						OUTPUT "There are no ships available. Please either add or load ships"
+					ELSE
+						destinationCheckMenu <- sStore
+				5:
+					displayDupe <- sStore
+
+				6:
+					viewShipsMenu <- none  
+
+				7:
+					saveShips <- sStore, fileMgr
+
+				8:
+					OUTPUT "You have selected to exit. Good Bye"
+
+			END CASE
+
+		
+		WHILE (option != 8)
+	END SUBMODULE
+
+
+	SUBMODULE: getFileName
+	IMPORT: none 
+	EXPORT: fileName (String)
+	ASSERTION: Retrieves the file name
+	ALGORITHM:
+		OUTPUT "\nPlease enter the file name with its extension (.csv): "
+		INPUT fileName (String)
+	END SUBMODULE
+
+
+	SUBMODULE: addShipMenuCSV
+	IMPORT: sStore (ShipStorage), filemgr (FileManager)
+	EXPORT: none
+	ASSERTION: Menu for when the user picks to load ships from a CSV file
+	ALGORITHM:
+		tempShipCount (Integer) := sStore.getShipCount <- none
+		count (Integer) := 0
+
+		fileName (String) := getFileName <- none
+		count := fileMgr.readFile <- fileName, sStore
+
+		WHILE (count == 0)
+			fileName (String) := getFileName <- none
+
+			count (Integer) := FileManager.readFile <- fileName, sStore
+		END WHILE
+
+		IF (count != 0) THEN
+			counter (Integer) := sStore.getShipCount <- none - tempShipCount
+			OUTPUT counter + " Ships loaded!"
+		END IF
+	END SUBMODULE
+
+	SUBMODULE: saveShips
+	IMPORT: sStore (ShipStorage), fileMgr (FileManager)
+	EXPORT: none
+	ASSERTION: When the user wants to save ships into a file
+	ALGORITHM:
+		OUTPUT "\nNOTE: If you enter a file that already exists, it will overwrite the file!"
+		fileName (String) := getFileName <- none
+
+		fileMgr.writeFiel <- fileName, sStore
+	END SUBMODULE
+
+
+	SUBMODULE: addSubs
+	IMPORT: sStore (ShipStorage)
+	EXPORT: none
+	ASSERTION: Inputs for all submarine ship type
+	ALGORITHM:
+
+		IF (sStore.getShipCount <- none >= 30) THEN
+				OUTPUT "There is no space left for a file to be added!"
+		ELSE
+
+			serialNum (String) := inputSerialNum <- "\nPlease input the serial number (XXX.YYY):", "ERROR: Format must be XXX.YYY \nXXX must be in the range of 100 - 300 (Inclusive)\nYYY must be in the range of 001 to 999\nIf you want to input a single integer, it must be 001"
+
+
+			inputComYear (Integer) := inputInteger <- "\nPlease input the commission year (1950 - 2022)", "ERROR: year must be from range of 1950 - 2022 (Inclusive). No decimal points!", 1950, 2022
+
+
+			inputCylinders (Integer) := inputInteger <- "\nPlease input the amount of cylinders (2 - 20):", "ERROR: Cylinders can only be from 2 - 20 (Inclusive)", 2, 20
+
+
+			fuel := inputFuel <- "\nPlease input the fuel type of the ship (Battery/Diesel/Bio):", "ERROR: Fuel types can only be either Battery, Diesel, or Bio"
+
+			CONSTRUCT subEngine USING inputCylinders,fuel
+
+			hull := inputHull <- "\nPlease input the hull material (Steel/Alloy/Titanium):", "ERROR: Materials must be either Steel, Alloy or Titanium"
+
+
+			inputMaxDepth := inputDouble <- "\nPlease input the maximum depth of the submarine (-500.0 - 0.0):", "ERROR: Maximum depth must be in range of -500.0 to 0.0 (inclusive)!", -500.0, 0.0
+
+			CONSTRUCT subObject USING serialNum, inputComYear, subEngine, hull, inputMaxDepth
+
+			sStore.addShip <- subObject	
+		END IF
+
+	END SUBMODULE
+
+
+	SUBMODULE: addJets
+	IMPORT: sStore (ShipStorage)
+	EXPORT: none
+	ASSERTION: Inputs for all fighter jet ship type
+	ALGORITHM:
+		IF (sStore.getShipCount <- none >= 30) THEN
+				OUTPUT "There is no space left for a file to be added!"
+		ELSE
+			serialNum (String) := inputSerialNum <- "\nPlease input the serial number (XXX.YYY):", "ERROR: Format must be XXX.YYY \nXXX must be in the range of 100 - 300 (Inclusive)\nYYY must be in the range of 001 to 999\nIf you want to input a single integer, it must be 001"
+
+
+			inputComYear (Integer) := inputInteger <- "\nPlease input the commission year (1950 - 2022)", "ERROR: year must be from range of 1950 - 2022 (Inclusive). No decimal points!", 1950, 2022
+
+
+			inputCylinders (Integer) := inputInteger <- "\nPlease input the amount of cylinders (2 - 20):", "ERROR: Cylinders can only be from 2 - 20 (Inclusive)", 2, 20
+
+
+			fuel := inputFuel <- "\nPlease input the fuel type of the ship (Battery/Diesel/Bio):", "ERROR: Fuel types can only be either Battery, Diesel, or Bio"
+
+			CONSTRUCT jetEngine USING inputCylinders,fuel
+
+			inputWingSpan := inputDouble <- "\nPlease input the wing span of the fighter jet (Range from 2.20 - 25.6):", "ERROR: Wing span must be in range of 2.20 to 25.6 (inclusive)!", 2.20, 25.6
+
+			ordnance (String) := inputOrdnance <- "\nPlease input the ordnance of the fighter jet:"
+
+
+
+			CONSTRUCT jetObject USING inputSerialNum, inputComYear, engineCF, inputOrdnance, inputWingSpan
+
+			sStore.addShip <- jetObject
+		END IF
+	END SUBMODULE
+
+	SUBMODULE: destinationCheckMenu
+	IMPORT: sStore (ShipStorage)
+	EXPORT: distance (Integer)
+	ASSERTION: When the user wants to see which ship is the fastest, this menu will be called
+	ALGORITHM:
+		distance (Integer) := inputInteger <- "\nPlease input the distance to check which ship is the fastest", "ERROR: Input must be a positive number!", 0, MAX_VALUE (maximum value of an integer)
+
+
+			fastestShip (String) := sStore.destinationCheck <- distance
+		OUTPUT fastestShip
+	END SUBMODULE
+
+
+	SUBMODULE: displayDupe
+	IMPORT: sStore (ShipStorage)
+	EXPORT: none
+	ASSERTION: When the user wants to check if any of the stored ships are duplicates
+	ALGORITHM:
+		dupeArray(ARRAY OF String) := sStore.findDuplicates <- none
+		OUTPUT "The following are duplicate ships: "
+
+		IF dupeArray[0] == null THEN
+
+			OUTPUT "There are no duplicates"
+		END IF
+
+		FOR index (Integer) := 0 TO dupeArray.length (Exclusive) INC BY 1
+
+			IF dupeArray[index] != null THEN 
+
+				OUTPUT dupeArray[index]
+			END IF 
+		END FOR
+
+	END SUBMODULE
+
+	SUBMODULE: viewShipsMenu
+	IMPORT: sStore (ShipStorage)
+	EXPORT: none
+	ASSERTION: view all the ships
+	ALGORITHM:
+		String[] viewShipArray = sStore.viewShips()
+
+		IF viewShipArray[0] == null THEN
+
+			OUTPUT "\nThere are no ships loaded to view!"
+
+		ELSE
+
+			OUTPUT "Ships currently in the system: \n"
+			FOR viewShipIndex (Integer) := 0 TO sStore.getShipCount <- none (Exclusive) INC BY 1
+
+				IF viewShipArray[viewShipIndex] != null THEN
+
+					OUTPUT viewShipArray[viewShipIndex]
+				END IF
+		END IF
+	END SUBMODULE
+
+	SUBMODULE: showMessage
+	IMPORT: message (String)
+	EXPORT: none
+	ALGORITHM:
+		OUTPUT message (String)
+	END SUBMODULE
+
+
+	SUBMODULE: inputInteger
+	IMPORT: prompt (String), error (String), min (Integer), max (Integer)
+	EXPORT: integerInput (Integer)
+	ASSERTION: User input submodule to input an integer that is within the specified range
+	ALGORITHM:
+		integerInput (Integer) := min - 1
+		outputString (String) := prompt
+
+		DO
+			TRY
+
+				OUTPUT outputString
+				outputString := error + "\n" + prompt
+				INPUT integerInput
+
+			CATCH InputMismatchException
+				FAIL
+
+		WHILE (integerInput < min OR integerInput > max)
+	END SUBMODULE
+
+
+	SUBMODULE: inputDouble
+	IMPORT: prompt (String), error (String), min (Real), max (Real)
+	EXPORT: integerInput (Integer)
+	ASSERTION: User input submodule to input a real that is within the specified range
+	ALGORITHM:
+		doubleInput (Real) := min - 1.0
+		outputString (String) := prompt       
+
+		DO
+			TRY
+
+				OUTPUT outputString
+				outputString := error + "\n" + prompt
+				INPUT doubleInput
+
+			CATCH InputMismatchException
+				FAIL
+
+		WHILE ((doubleInput < min) OR (doubleInput > max))
+	END SUBMODULE
+
+
+
+	SUBMODULE: inputSerialNum
+	IMPORT: prompt (String), error (String)
+	EXPORT: inputSerialNum (String)
+	ASSERTION: User input submodule to input the serialNum of ship and validate input
+	ALGORITHM:
+		outputString (String) := prompt
+		inputSerialNum (String) := null
+		DO
+			OUTPUT outputString
+			outputString :=  error + "\n" + prompt
+			INPUT inputSerialNum
+		WHILE inputSerialNum == Null OR inputSerialNum is Empty OR Ship.validateSerialNum <- inputSerialNum == false
+	END SUBMODULE
+
+
+
+	SUBMODULE: inputFuel
+	IMPORT: prompt (String), error (String)
+	EXPORT: inputFuel (String)
+	ASSERTION: User input submodule to input the fuel type of ship and validate input
+	ALGORITHM:
+		outputString (String) := prompt
+		inputFuel (String) := null
+		DO
+			OUTPUT outputString
+			outputString :=  error + "\n" + prompt
+			INPUT inputFuel
+		WHILE inputFuel == Null OR inputFuel is Empty OR Engine.validateFuel <- inputFuel == false
+	END SUBMODULE
+
+
+
+	SUBMODULE: inputHull
+	IMPORT: prompt (String), error (String)
+	EXPORT: inputHull (String)
+	ASSERTION: User input submodule to input the hull material and validate input
+	ALGORITHM:
+		outputString (String) := prompt
+		inputHull (String) := null
+		DO
+			OUTPUT outputString
+			outputString :=  error + "\n" + prompt
+			INPUT inputHull
+		WHILE inputHull == Null OR inputHull is Empty OR Submarine.validateHull <- inputHull == false
+	END SUBMODULE
+
+
+
+
+	SUBMODULE: inputOrdnance
+	IMPORT: prompt (String), error (String)
+	EXPORT: inputOrdnance (String)
+	ASSERTION: User input submodule to input the ordnance of the ship
+	ALGORITHM:
+		outputString (String) := prompt
+		inputOrdnance (String) := null
+		DO
+			OUTPUT outputString
+			outputString :=  error + "\n" + prompt
+			INPUT inputOrdnance
+		WHILE inputOrdnance == Null OR inputOrdnance is Empty
+	END SUBMODULE
+END CLASS
+

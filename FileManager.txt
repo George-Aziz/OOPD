@@ -1,0 +1,187 @@
+/*****************************************************************************
+*  Author: George Aziz
+*  Date: 04/05/2019
+*  Date Last Modified: 26/05/2019
+*  Purpose: Managing any file reading/writing including processing every line 
+*           of a loaded file
+******************************************************************************/
+
+Class: FileManager
+
+	SUBMODULE: readFile
+	IMPORT: fileName (String), sStore (ShipStorage)
+	EXPORT: Count (Integer)
+	ASSERTION: To be able to read the file inputted by the user
+	ALGORITHM:
+		count (Integer) := 0
+
+		TRY
+			fileStrm := CONSTRUCT FileInputStream USING fileName
+			inRdr := CONSTRUCT InputStreamReader USING fileStrm
+			bufRdr := CONSTRUCT BufferedReader USING inRdr
+
+			count (Integer) := 0
+
+			COMMENT: use a while loop incase the file is empty
+
+			line = bufRdr.readLine <- none
+			WHILE (line != null)
+				TRY                
+					COMMENT: try to process the line
+					processLine <- line, sStore
+
+					COMMENT: only increase the count if the line had no errors
+					INC count BY 1
+
+				CATCH IllegalArgumentException e                
+					COMMENT: whatever went wrong, show the error to the user
+					UserInterface.showMessage <- e.getMessage<- none + " " + line
+
+				COMMENT: read the next line
+				line = bufRdr.readLine <- none            
+
+			fileStrm.close <- none
+
+		CATCH IOException e
+			TRY           
+				IF (fileStrm NOT null) THEN
+					fileStrm.close <- none
+				END IF                
+
+			CATCH IOException ex             
+				COMMENT: file won't close, nothing can be done
+	END SUBMODULE
+
+	SUBMODULE: processLine
+	IMPORT: line (String), sStore (ShipStorage)
+	EXPORT: none
+	PURPOSE: To be able to process a line from a file that should represent a ship
+	ALGORITHM: 
+
+		lineArray(ARRAY OF String) = line.split <- ","
+
+		IF lineArray.length != 7 THEN
+			THROW EXCEPTION <- "ERROR - ERROR - Invalid Line!"
+		END IF
+
+
+		IF lineArray[0].length <- none != 1 THEN
+			THROW EXCEPTION <- "ERROR - The first field must be only 1 character long"
+		END IF
+
+
+		IF Ship.validateSerialNum <- lineARRAY[1] THEN
+			serialNum := lineArray[1]
+		ELSE
+			FAIL <- "Invalid Serial Number"
+		END IF
+
+
+		IF Ship.validateComYear <- (Integer) lineArray[2] THEN
+			comYear := (Integer) lineArray[2]
+		ELSE
+			FAIL <- "Invalid year"
+		END IF
+
+
+		IF Engine.validateCylinders <- (Integer) lineArray[3] THEN
+			cylinders := (Integer) lineArray[3]
+		ELSE
+			FAIL <- "Invalid cylinders"
+		END IF
+
+
+		IF Engine.validateFuel <- lineArray[4] THEN
+			fuel := lineArray[4]
+		ELSE
+			FAIL <- "Invalid fuel type"
+		END IF
+
+
+		CONSTRUCT engineCF USING cylinders and fuel
+
+		TRY        
+			COMMENT: convert the character to uppercase in order to make error checking easier
+			CASE lineArray[0]
+				'S':
+					COMMENT: Variables exclusive to the submarines 
+
+					IF Submarine.validateHull <-lineArray[5] THEN
+						hull := lineArray[5]
+					ELSE
+						FAIL <- "Invalid hull material"
+					END IF
+
+
+					IF Submarine.validateMaxDepth <- (Real) lineArray[6] THEN
+						maxDepth := (Real) lineArray[6]
+					ELSE
+						FAIL <- "Invalid maximum depth"
+					END IF
+
+
+					CONSTRUCT subObject USING serialNum, comYear, engineCF, hull, maxDepth
+
+					sStore.addShip <- subObject
+
+				'F':
+
+					COMMENT: Variables exclusive to the fighter jets
+
+					IF FighterJet.validateWingSpan <- (Real) lineArray[5] THEN
+						wingSpan := (Real) lineArray[5]
+					ELSE
+						FAIL <- "Invalid wing span"
+					END IF
+
+
+					ordnance (String) := lineArray[6]
+
+
+					CONSTRUCT jetObject USING serialNum, comYear, engineCF ordnance, wingSpan
+
+					sStore.addShip <- jetObject
+
+				DEFAULT:
+					FAIL "Invalid type detected"
+		CATCH IllegalArgumentException e        
+			FAIL UserInterface.showMessage <-e.getMessage <- none + " " + line
+
+	END SUBMODULE
+
+	SUBMODULE: writeFile
+	IMPORT: fileName (String, sStore (ShipStorage)
+	EXPORT: none
+	ASSERTION: To be able to write ships to a file
+	ALGORITHM:
+		shipArray (ARRAY OF Ship Objects) :=sStore.getShipArray <- none
+
+		fileStrm (FileOutputStream) := null
+
+		Construct file USING fileName
+
+		TRY
+
+			CONSTRUCT fileStrm USING fileName
+			CONSTRUCT pw USING fileStrm
+
+			FOR (fileIndex (Integer) := 0 TO sStore.getShipCount <- none (Exclusive) INC fileIndex BY 1)
+				pw.println <- shipArray[fileIndex].toFileString <- none
+			END FOR
+
+			CLOSE pw
+			message (String) := "Ships succesfully saved!"
+			UserInterface.showMessage <- message
+
+		CATCH IOException
+			IF fileStrm != null THEN
+				TRY
+					fileStrm.close <- none
+				CATCH IOException ex2
+			END IF
+
+			message := "Ships not saved!"
+			UserInterface.showMessage <- message
+	END SUBMODULE
+END CLASS
+
